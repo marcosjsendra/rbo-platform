@@ -1,0 +1,13 @@
+# Authentication Credentials – TWO OFFICES
+
+## RE/MAX BLUE OCEAN
+
+- **Public Key**: `07D693F7-12DC-4E7D-B652-E5CD38B591B4`
+- **Private Key**: `050DC15F-C892-445A-A516-05459A07B2F1`
+- **Integrator ID**: `R1040028`
+
+## RE/MAX AZURA
+
+- **Public Key**: `3CD7819D-FD26-4DD6-ACAF-04D36E6365F5`
+- **Private Key**: `27097A65-9E97-460F-B6DA-8BBB548A893E`
+- **Integrator ID**: `R1040029`
