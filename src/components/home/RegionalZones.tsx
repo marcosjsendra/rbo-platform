@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 
 interface Zone {
   id: number;
@@ -128,14 +129,17 @@ export default function RegionalZones() {
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {zones.map((zone) => (
+            {zones.map((zone, index) => (
               <div key={zone.id} className="group relative rounded-xl overflow-hidden h-64">
                 <div className="absolute inset-0 bg-gray-200">
                   {zone.imageUrl ? (
-                    <img 
+                    <Image 
                       src={zone.imageUrl} 
                       alt={zone.name}
                       className="w-full h-full object-cover"
+                      width={500}
+                      height={300}
+                      priority={index < 3}
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-gray-400">

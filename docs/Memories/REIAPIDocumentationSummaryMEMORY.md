@@ -1,3 +1,7 @@
+### REI API CCA v1.0 Documentation Summary
+
+tags: rei_api, api_documentation, authentication, endpoints, data_structure
+
 ## REI API CCA v1.0 Documentation Summary
 
 The REI API CCA v1.0 is a JSON-based API that enables data retrieval and updates for the RECONNECT property publication system. It will be used for retrieving properties and agents for the RE/MAX Blue Ocean website.

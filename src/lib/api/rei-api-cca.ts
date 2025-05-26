@@ -9,7 +9,6 @@
  */
 
 import axios from 'axios';
-import { REMAX_AZURA_CREDENTIALS, REMAX_BLUE_OCEAN_CREDENTIALS } from '.';
 
 // Define the brand type
 export type BrandType = 'AZURA' | 'BLUE_OCEAN';
@@ -84,7 +83,7 @@ export class ReiApiCcaClient {
    * @param endpoint - The API endpoint to request
    * @returns The API response data
    */
-  async makeRequest(endpoint: string): Promise<any> {
+  async makeRequest(endpoint: string): Promise<Record<string, unknown>> {
     try {
       console.log(`[Client] Making request to REI API CCA: ${endpoint}`);
       
@@ -101,16 +100,17 @@ export class ReiApiCcaClient {
       
       console.log(`[Client] Request to ${endpoint} successful`);
       return response.data;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error(`[Client] Error making request to ${endpoint}:`, error);
       
       // Provide more detailed error information
-      if (error.response) {
-        console.error(`[Client] Response status: ${error.response.status}`);
+      if (axios.isAxiosError(error) && error.response) {
+        console.error(`[Client] Response status:`, error.response.status);
         console.error(`[Client] Response data:`, error.response.data);
+        throw new Error(`API request to ${endpoint} failed: ${error.message}`);
       }
       
-      throw new Error(`API request failed: ${error.message}`);
+      throw new Error(`API request to ${endpoint} failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 
@@ -118,7 +118,7 @@ export class ReiApiCcaClient {
    * Test the API connection
    * @returns The API connection test response
    */
-  async testConnection(): Promise<any> {
+  async testConnection(): Promise<Record<string, unknown>> {
     try {
       console.log(`[Client] Testing API connection`);
       
@@ -127,9 +127,17 @@ export class ReiApiCcaClient {
       
       console.log(`[Client] API connection test successful:`, response.data);
       return response.data;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error(`[Client] API connection test failed:`, error);
-      throw new Error(`API connection test failed: ${error.message}`);
+      
+      // Provide more detailed error information
+      if (axios.isAxiosError(error) && error.response) {
+        console.error(`[Client] Response status:`, error.response.status);
+        console.error(`[Client] Response data:`, error.response.data);
+        throw new Error(`API connection test failed: ${error.message}`);
+      }
+      
+      throw new Error(`API connection test failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 
@@ -137,7 +145,7 @@ export class ReiApiCcaClient {
    * Test the authentication with the REI API CCA
    * @returns The authentication test response
    */
-  async testAuthentication(): Promise<any> {
+  async testAuthentication(): Promise<Record<string, unknown>> {
     try {
       console.log(`[Client] Testing authentication for ${this.credentials.integratorId}`);
       
@@ -148,16 +156,17 @@ export class ReiApiCcaClient {
       
       console.log(`[Client] Authentication test successful for ${this.credentials.integratorId}:`, response.data);
       return response.data;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error(`[Client] Authentication test failed for ${this.credentials.integratorId}:`, error);
       
       // Provide more detailed error information
-      if (error.response) {
-        console.error(`[Client] Response status: ${error.response.status}`);
+      if (axios.isAxiosError(error) && error.response) {
+        console.error(`[Client] Response status:`, error.response.status);
         console.error(`[Client] Response data:`, error.response.data);
+        throw new Error(`Authentication test failed for ${this.credentials.integratorId}: ${error.message}`);
       }
       
-      throw new Error(`Authentication test failed: ${error.message}`);
+      throw new Error(`Authentication test failed for ${this.credentials.integratorId}: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 
@@ -167,7 +176,7 @@ export class ReiApiCcaClient {
    * @param skip - Number of properties to skip
    * @returns The properties response
    */
-  async getProperties(take: number = 10, skip: number = 0): Promise<any> {
+  async getProperties(take: number = 10, skip: number = 0): Promise<Record<string, unknown>> {
     return this.makeRequest(`GetProperties/take/${take}/skip/${skip}`);
   }
 
@@ -176,7 +185,7 @@ export class ReiApiCcaClient {
    * @param listingId - The listing ID
    * @returns The property details response
    */
-  async getPropertyDetails(listingId: string): Promise<any> {
+  async getPropertyDetails(listingId: string): Promise<Record<string, unknown>> {
     return this.makeRequest(`GetPropertyDetails/${listingId}`);
   }
 
@@ -185,7 +194,7 @@ export class ReiApiCcaClient {
    * @param listingId - The listing ID
    * @returns The property images response
    */
-  async getPropertyImages(listingId: string): Promise<any> {
+  async getPropertyImages(listingId: string): Promise<Record<string, unknown>> {
     return this.makeRequest(`propertyimages/${listingId}`);
   }
 
@@ -195,7 +204,7 @@ export class ReiApiCcaClient {
    * @param skip - Number of associates to skip
    * @returns The associates response
    */
-  async getAssociates(take: number = 10, skip: number = 0): Promise<any> {
+  async getAssociates(take: number = 10, skip: number = 0): Promise<Record<string, unknown>> {
     return this.makeRequest(`associates/take/${take}/skip/${skip}`);
   }
 
@@ -204,7 +213,7 @@ export class ReiApiCcaClient {
    * @param associateId - The associate ID
    * @returns The associate details response
    */
-  async getAssociateDetails(associateId: string): Promise<any> {
+  async getAssociateDetails(associateId: string): Promise<Record<string, unknown>> {
     return this.makeRequest(`associates/${associateId}`);
   }
 
@@ -212,7 +221,7 @@ export class ReiApiCcaClient {
    * Get lookup names from the REI API CCA
    * @returns The lookup names response
    */
-  async getLookupNames(): Promise<any> {
+  async getLookupNames(): Promise<Record<string, unknown>> {
     return this.makeRequest('lookups/names');
   }
 
@@ -221,7 +230,7 @@ export class ReiApiCcaClient {
    * @param id - The lookup ID
    * @returns The lookup details response
    */
-  async getLookupDetails(id: string): Promise<any> {
+  async getLookupDetails(id: string): Promise<Record<string, unknown>> {
     return this.makeRequest(`lookups/detailsbyid/${id}`);
   }
 
@@ -229,7 +238,7 @@ export class ReiApiCcaClient {
    * Get countries from the REI API CCA
    * @returns The countries response
    */
-  async getCountries(): Promise<any> {
+  async getCountries(): Promise<Record<string, unknown>> {
     return this.makeRequest('geo/countries');
   }
 
@@ -238,7 +247,7 @@ export class ReiApiCcaClient {
    * @param countryId - The country ID
    * @returns The state/provinces response
    */
-  async getStateProvinces(countryId: string): Promise<any> {
+  async getStateProvinces(countryId: string): Promise<Record<string, unknown>> {
     return this.makeRequest(`geo/countries/${countryId}/StateProvincesInaCountry`);
   }
 
@@ -248,7 +257,7 @@ export class ReiApiCcaClient {
    * @param stateProvinceId - The state/province ID
    * @returns The locations response
    */
-  async getLocations(countryId: string, stateProvinceId: string): Promise<any> {
+  async getLocations(countryId: string, stateProvinceId: string): Promise<Record<string, unknown>> {
     return this.makeRequest(`geo/countries/${countryId}/StateProvincesInaCountry/${stateProvinceId}/LocationsInAStateProvince`);
   }
 }

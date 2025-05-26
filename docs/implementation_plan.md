@@ -49,6 +49,24 @@
   - [ ] 3.1.2 Implement search API integration
   - [ ] 3.1.3 Add search results page
   - [ ] 3.1.4 Implement search history and suggestions
+
+### Phase 4: Deployment & Performance Optimization
+
+- [x] 4.1 Set up Vercel deployment
+  - [x] [4.1.1 Configure environment variables for API credentials](./vercelDeployment/deployment_guide.md)
+  - [x] [4.1.2 Fix ESLint and TypeScript errors](./vercelDeployment/deployment_guide.md)
+  - [x] [4.1.3 Deploy to production environment](./vercelDeployment/deployment_guide.md)
+  - [ ] 4.1.4 Set up custom domain (pending)
+- [ ] 4.2 Performance optimization
+  - [ ] 4.2.1 Implement image optimization strategies
+  - [ ] 4.2.2 Add caching mechanisms for API responses
+  - [ ] 4.2.3 Configure Incremental Static Regeneration (ISR)
+  - [ ] 4.2.4 Optimize bundle size and code splitting
+- [ ] 4.3 Monitoring and analytics
+  - [ ] 4.3.1 Set up Vercel Analytics
+  - [ ] 4.3.2 Implement error tracking
+  - [ ] 4.3.3 Configure performance monitoring
+  - [ ] 4.3.4 Set up alerting for critical issues
   - [ ] 3.1.5 Add keyboard navigation for search
 - [ ] 3.2 Add filtering options
   - [ ] 3.2.1 Design filter sidebar/modal
