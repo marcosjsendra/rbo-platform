@@ -1,6 +1,6 @@
 # RE/MAX Blue Ocean Real Estate Platform
 
-A modern real estate website for RE/MAX Blue Ocean, built with Next.js, TypeScript, and Tailwind CSS. This platform showcases luxury properties in Costa Rica's Blue Zone, featuring property listings, agent directories, and comprehensive real estate services.
+A modern real estate website for RE/MAX AZURA and RE/MAX BLUE OCEAN, built with Next.js, TypeScript, and Tailwind CSS. This platform showcases luxury properties in Costa Rica's Blue Zone, featuring property listings, agent directories, and comprehensive real estate services.
 
 ## Current Status: Phase 4 - Vercel Deployment Complete
 
@@ -47,124 +47,88 @@ A modern real estate website for RE/MAX Blue Ocean, built with Next.js, TypeScri
   - ESLint and TypeScript error fixes
   - Production deployment
   - Deployment documentation
-  - [x] REI API CCA service module implementation
-    - OAuth 2.0 authentication with token management
-    - Comprehensive endpoint methods for properties and agents
-    - Error handling and detailed logging
-    - Environment variable support for credentials
-    - Support for both RE/MAX AZURA and RE/MAX BLUE OCEAN offices
+- [x] REI API CCA service module implementation
+  - OAuth 2.0 authentication with token management
+  - Comprehensive endpoint methods for properties and agents
+  - Error handling and retry mechanisms
+  - Environment variable support for credentials
+  - Support for both RE/MAX AZURA and RE/MAX BLUE OCEAN offices
   - [x] API Testing Interface
+    - Endpoint testing utilities
     - Authentication testing
-    - Property data retrieval
-    - Agent data retrieval
-    - Lookup data retrieval
-    - Toggle between both RE/MAX offices
+    - Response validation
+    - Error simulation
 
-### In Progress
+### Next Steps
 
-- Database integration:
-  - Schema design for property and agent data
-  - Data synchronization service
-  - Caching mechanism for API responses
+- [ ] Property Listings Page
+  - Grid/list view toggle
+  - Filtering by property attributes
+  - Sorting options
+  - Pagination
+- [ ] Property Details Page
+  - Image gallery with lightbox
+  - Property specifications
+  - Location map
+  - Contact form for inquiries
+- [ ] Agent Directory
+  - Agent search and filtering
+  - Agent profile pages
+  - Contact forms for each agent
+- [ ] Search Functionality
+  - Advanced search with multiple criteria
+  - Saved searches
+  - Search results page
+- [ ] Database Integration
+  - Supabase setup and configuration
+  - Data models for properties and agents
+  - Synchronization with REI API CCA
+- [ ] Custom Domain Setup
+  - DNS configuration
+  - SSL certificate setup
+  - Domain verification
 
-### Up Next
+## Project Objectives
 
-- Property listing pages implementation
-- Search and filter functionality
-- Agent directory implementation
-- Property detail pages
+### Core Features
 
-## Implementation Plan Summary
+- **Property Listings**: Grid/list view with filtering and sorting
+- **Property Details**: Image gallery, specifications, location map
+- **Agent Directory**: Agent cards with contact information
+- **Search & Filtering**: Advanced search with multiple criteria
+- **Realtime Updates**: Live property status changes
 
-### Phase 1: Setup & Static Pages (Completed ✅)
-Focus on project setup and static content implementation, including:
-- Next.js with TypeScript project initialization
-- Tailwind CSS setup and styling system
-- Core layout components (Header, Footer, Navigation)
-- Static pages (Home, About Us, Services, Blue Zone, Team, Contact)
-
-### Phase 2: API Integration (In Progress 🔄)
-Integration with the REI API CCA for property and agent data:
-- API client with authentication for both RE/MAX offices
-- Property listing page implementation
-- Property detail page development
-- Agent directory setup
-
-### Phase 3: Search & Filtering (Upcoming 📅)
-Implementation of search and filtering functionality:
-- Search component and API integration
-- Filter options for properties
-- Sorting and pagination
-- Loading states and error handling
-
-### Phase 4: Deployment & Performance (Started ✅)
-Deployment and optimization of the application:
-- Vercel deployment configuration (Completed)
-- Performance optimization strategies
-- Monitoring and analytics setup
-- Custom domain configuration
-
-## Features
-
-### Implemented
-
-- **Responsive Layout** - Mobile-first design with Tailwind CSS
-- **Modern Navigation** - Intuitive header with dropdown menus and mobile support
-- **Comprehensive Footer** - Quick links, contact info, and newsletter signup
-- **Dynamic Home Page** - Engaging landing page with multiple sections
-- **Type Safety** - Full TypeScript support throughout the application
-- **Component Library** - Reusable UI components for consistent design
-- **Loading States** - Smooth loading experience for async content
-- **API Integration** - REI API CCA client for property and agent data
-  - Authentication with both RE/MAX offices (AZURA and BLUE OCEAN)
-  - Property data retrieval and processing
-  - Agent data retrieval and processing
-  - Lookup data for categorization and filtering
-
-### Coming Soon
-
-- **Property Search** - Filter and search luxury properties
-- **Agent Directory** - Connect with RE/MAX professionals
-- **Interactive Maps** - Property locations with Mapbox
-- **Multi-language Support** - English and Spanish interface
-
-## Tech Stack
+## Technology Stack
 
 ### Core Technologies
 
-- **Framework**: Next.js 14 (App Router)
-- **Language**: TypeScript 5.0+
-- **Styling**: Tailwind CSS 3.4+
-- **UI Components**: Headless UI + Custom Components
-- **Icons**: Heroicons
-- **Image Optimization**: Next.js Image Component
-- **Form Handling**: React Hook Form
-- **State Management**: React Query (for API integration)
+- **Frontend Framework**: Next.js 14 (App Router) with TypeScript
+- **Styling**: Tailwind CSS
+- **UI Components**: Headless UI / Radix UI
+- **State Management**: React Query (TanStack Query)
 - **HTTP Client**: Axios
+- **Form Handling**: React Hook Form with Zod
+- **Maps**: Mapbox / Google Maps
 - **Deployment**: Vercel
-
-### Dependencies
-
-```json
-{
-  "dependencies": {
-    "next": "^14.0.0",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "tailwindcss": "^3.3.0",
-    "@heroicons/react": "^2.0.18",
-    "@headlessui/react": "^1.7.0",
-    "react-hook-form": "^7.45.0",
-    "axios": "^1.6.0"
-  }
-}
-```
+- **Authentication**: NextAuth.js
+- **Database**: Supabase PostgreSQL
+- **ORM**: Prisma
 
 ## Project Structure
 
 ```
 remax-blueocean/
 ├── public/                    # Static assets
+│   ├── images/                # Image assets
+│   │   ├── remax-logo.svg
+│   │   ├── contact-hero.jpg
+│   │   └── (other image assets)
+│   ├── file.svg
+│   ├── globe.svg
+│   ├── next.svg
+│   ├── vercel.svg
+│   └── window.svg
+│
 ├── src/
 │   ├── app/                   # App router pages
 │   │   ├── about-us/          # About page
@@ -243,8 +207,66 @@ remax-blueocean/
 - `npm run lint` - Run ESLint
 - `npm run format` - Format code with Prettier
 
+## Project Constraints and Mitigation Strategies
+
+### Key Constraints
+
+1. **API Constraints**
+
+   - REI API CCA dependency for property and agent data
+   - Rate limiting and authentication requirements
+   - Data format standardization needs
+   - Proper attribution of listing data to RE/MAX
+
+2. **User Experience Constraints**
+
+   - Responsive design requirements across various devices
+   - Accessibility compliance (WCAG standards)
+   - Load time expectations for property listings and images
+   - Browser compatibility requirements
+
+3. **Branding Constraints**
+
+   - RE/MAX brand guidelines compliance
+   - Consistent presentation of RE/MAX AZURA and RE/MAX BLUE OCEAN identities
+   - Logo usage and color scheme requirements
+
+4. **Implementation Constraints**
+   - Development timeline (phased approach outlined in plan)
+   - Edge Function execution limits in Supabase
+   - Vercel deployment limitations (build times, serverless function execution)
+   - Testing requirements across multiple environments
+
+### Mitigation Strategies
+
+1. **API Dependency Mitigation**
+
+   - Implement adapter pattern for API integration
+   - Create comprehensive error handling for API interactions
+   - Develop fallback mechanisms for API unavailability
+   - Monitor API changes and update integration as needed
+
+2. **Performance Optimization**
+
+   - Image optimization pipeline with Next.js Image component
+   - Use lazy loading for off-screen content
+   - Implement efficient caching strategies
+   - Optimize database queries with proper indexing
+
+3. **Data Integrity**
+   - Implement data validation at multiple levels
+   - Create comprehensive logging for data synchronization
+   - Develop automated testing for data consistency
+   - Implement notification system for synchronization failures
+
+## Deployment
+
+The website is currently deployed on Vercel at:
+[https://remax-blueocean-cap04krys-marcos-sendras-projects.vercel.app](https://remax-blueocean-cap04krys-marcos-sendras-projects.vercel.app)
+
 ## Acknowledgments
 
 - [Next.js Documentation](https://nextjs.org/docs)
 - [Tailwind CSS Documentation](https://tailwindcss.com/docs)
 - [RE/MAX API Documentation](https://remax-cca.com/api-docs)
+- [Supabase Documentation](https://supabase.com/docs)

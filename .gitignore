@@ -39,3 +39,13 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Docs
+/docs/2officesCredentials.md
+/docs/MCP
+/docs/Memories&Rules
+/docs/prompts
+/docs/vercelDeployment
+/docs/REI API CCA v1.markdown
+/docs/PLANNING.md
+
