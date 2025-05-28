@@ -4,28 +4,29 @@
 
 ### NAVIGATION BAR
 
-* **Logo** *(Home link)*
-* **Listings**
-* **Luxury Collection**
-* **About** *(Current Page)*
+- **Logo** _(Home link)_
+- **Listings**
+- **Luxury Collection**
+- **About** _(Current Page)_
 
-  * Our Offices
-  * Meet Our Agents
-  * Services
-  * Costa Rica Blue Zone
-* **Blog**
-* **Language Selector** *(Dropdown)*
-* **Sign In** *(Button)*
-* **List Your Property** *(Button)*
+  - Our Offices
+  - Meet Our Agents
+  - Services
+  - Costa Rica Blue Zone
+
+- **Blog**
+- **Language Selector** _(Dropdown)_
+- **Sign In** _(Button)_
+- **List Your Property** _(Button)_
 
 ---
 
 ### HERO SECTION
 
 **Headline:**
-*Your Trusted Nosara & Sámara Costa Rica Real Estate*
+_Your Trusted Nosara & Sámara Costa Rica Real Estate_
 
-*Background Image Placeholder (to be replaced)*
+_Background Image Placeholder (to be replaced)_
 
 ---
 
@@ -75,7 +76,7 @@ We are not just real estate agents; we are passionate advocates for the beauty a
 
 With the dedicated assistance of RE/MAX Blue Ocean, embrace the promise of paradise in Nosara, Costa Rica. We are committed to turning your real estate goals into reality. Let us guide you in discovering your perfect piece of heaven.
 
-*Don’t just buy a house; invest in a way of life.*
+_Don’t just buy a house; invest in a way of life._
 **Contact RE/MAX Blue Ocean today. Your dream home is waiting.**
 
 ---
@@ -108,4 +109,4 @@ Playa Guiones, 150 mts oeste de Café París, local #5, Provincia de Guanacaste,
 
 ### FOOTER
 
-*Standard footer with mission statement, contact, social media, legal disclaimer, and office links as per homepage layout.*
+_Standard footer with mission statement, contact, social media, legal disclaimer, and office links as per homepage layout._
