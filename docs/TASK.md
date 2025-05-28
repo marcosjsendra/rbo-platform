@@ -26,9 +26,9 @@
 - [ ] 2.1 Set up Supabase project and database
   - [x] [2.1.1 Create Supabase project](./Progress%20Tracker/Phase2/Task2_1_1_Report.md)
   - [x] [2.1.2 Configure environment variables for Supabase](./Progress%20Tracker/Phase2/Task2_1_2_Report.md)
-  - [ ] 2.1.3 Create database schema for properties, zones and agents
-  - [ ] 2.1.4 Set up Row Level Security policies
-  - [ ] 2.1.5 Create database indexes for performance optimization
+  - [x] [2.1.3 Create database schema for properties, zones and agents](./Progress%20Tracker/Phase2/Task2_1_3_Report.md)
+  - [x] [2.1.4 Set up Row Level Security policies](./Progress%20Tracker/Phase2/Task2_1_4_Report.md)
+  - [x] [2.1.5 Create database indexes for performance optimization](./Progress%20Tracker/Phase2/Task2_1_5_Report.md)
 - [ ] 2.2 Set up API client with authentication
   - [x] [2.2.1 Create API service module for REI API CCA](./Progress%20Tracker/Phase2/Task2_1_1_Report.md)
   - [ ] 2.2.2 Implement OAuth token management with refresh mechanism
