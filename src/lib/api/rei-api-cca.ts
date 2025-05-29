@@ -6,9 +6,13 @@
  * This module provides a client for interacting with the REI API CCA,
  * handling authentication and providing methods for accessing various
  * API endpoints. It works with both the real API and mock data.
+ * 
+ * The client uses the token management service to handle OAuth token
+ * acquisition, validation, and automatic refresh.
  */
 
-import axios from 'axios';
+import axios, { AxiosError, AxiosRequestConfig } from 'axios';
+import { getValidToken, tokenNeedsRefresh, forceRefreshToken } from './token-manager';
 
 // Define the brand type
 export type BrandType = 'AZURA' | 'BLUE_OCEAN';
@@ -81,27 +85,77 @@ export class ReiApiCcaClient {
   /**
    * Make a request to the REI API CCA
    * @param endpoint - The API endpoint to request
+   * @param options - Additional request options
    * @returns The API response data
    */
-  async makeRequest(endpoint: string): Promise<Record<string, unknown>> {
+  async makeRequest(
+    endpoint: string, 
+    options: { method?: 'GET' | 'POST'; data?: unknown } = { method: 'GET' }
+  ): Promise<Record<string, unknown>> {
     try {
-      console.log(`[Client] Making request to REI API CCA: ${endpoint}`);
+      console.log(`[Client] Making ${options.method || 'GET'} request to REI API CCA: ${endpoint}`);
       
       // Ensure the endpoint has the correct format
       const formattedEndpoint = endpoint.startsWith('/') ? endpoint.substring(1) : endpoint;
       
-      // Make the request via our server-side API route
-      const response = await axios.get('/api/rei-cca', {
+      // Check if token needs refresh before making the request
+      if (tokenNeedsRefresh(this.credentials)) {
+        console.log(`[Client] Token needs refresh before request to ${endpoint}`);
+        await forceRefreshToken(this.credentials);
+      }
+      
+      // Set up request config
+      const requestConfig: AxiosRequestConfig = {
         params: {
           endpoint: formattedEndpoint,
           integratorId: this.credentials.integratorId
         }
-      });
+      };
+      
+      // Add data if provided
+      if (options.data) {
+        requestConfig.data = options.data;
+      }
+      
+      // Make the request via our server-side API route
+      // Get the base URL for the API calls
+      // In browser environments, we need to use the window.location.origin
+      // In Node.js environments (like during SSR), we need to use a fallback
+      const baseUrl = typeof window !== 'undefined' 
+        ? window.location.origin 
+        : process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3000';
+      
+      // Use absolute URLs to avoid 'Invalid URL' errors
+      let response;
+      if (options.method === 'POST') {
+        response = await axios.post(`${baseUrl}/api/rei-cca`, requestConfig.data, {
+          params: requestConfig.params
+        });
+      } else {
+        response = await axios.get(`${baseUrl}/api/rei-cca`, requestConfig);
+      }
       
       console.log(`[Client] Request to ${endpoint} successful`);
       return response.data;
     } catch (error: unknown) {
       console.error(`[Client] Error making request to ${endpoint}:`, error);
+      
+      // Handle token-related errors
+      if (axios.isAxiosError(error) && error.response?.status === 401) {
+        console.log(`[Client] Received 401 Unauthorized, attempting token refresh`);
+        
+        try {
+          // Force refresh the token
+          await forceRefreshToken(this.credentials);
+          
+          // Retry the request
+          console.log(`[Client] Retrying request to ${endpoint} after token refresh`);
+          return this.makeRequest(endpoint, options);
+        } catch (refreshError) {
+          console.error(`[Client] Token refresh failed:`, refreshError);
+          throw new Error(`Token refresh failed: ${refreshError instanceof Error ? refreshError.message : 'Unknown error'}`);
+        }
+      }
       
       // Provide more detailed error information
       if (axios.isAxiosError(error) && error.response) {
@@ -149,13 +203,16 @@ export class ReiApiCcaClient {
     try {
       console.log(`[Client] Testing authentication for ${this.credentials.integratorId}`);
       
-      // Make a request to the test auth endpoint
-      const response = await axios.post('/api/rei-cca/auth', {
-        integratorId: this.credentials.integratorId
-      });
+      // Force a token refresh to test authentication
+      const token = await forceRefreshToken(this.credentials);
       
-      console.log(`[Client] Authentication test successful for ${this.credentials.integratorId}:`, response.data);
-      return response.data;
+      console.log(`[Client] Authentication test successful for ${this.credentials.integratorId}`);
+      return {
+        status: "ok",
+        message: "Authentication successful",
+        token_obtained: !!token,
+        integrator_id: this.credentials.integratorId
+      };
     } catch (error: unknown) {
       console.error(`[Client] Authentication test failed for ${this.credentials.integratorId}:`, error);
       

@@ -7,14 +7,14 @@
 
 import { Suspense } from 'react'
 import SupabaseExample from '@/components/examples/SupabaseExample'
-import { supabaseServer } from '@/lib/supabase'
+import { createServerComponentClient } from '@/lib/supabase/server'
 
 // Server component to fetch and display zone count
 async function ZoneStats() {
   try {
     console.log('src/app/supabase-test/page.tsx: Creating Supabase server client')
-    // Create a Supabase server client
-    const supabase = supabaseServer.createClient()
+    // Create a Supabase server component client
+    const supabase = createServerComponentClient()
     
     console.log('src/app/supabase-test/page.tsx: Querying zones table')
     // Query the zones table to get count

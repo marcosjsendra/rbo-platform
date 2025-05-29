@@ -10,13 +10,20 @@ export default function Header() {
   return (
     <header className="w-full z-50 bg-white shadow-md">
       {/* Test Environment Links */}
-      <div className="bg-gradient-to-r from-red-600 to-red-700 px-4 py-2 flex justify-center">
+      <div className="bg-gradient-to-r from-red-600 to-red-700 px-4 py-2 flex justify-center gap-4">
         <Link
           href="/api-test"
           className="text-xs font-medium text-white hover:text-gray-200 transition-colors flex items-center gap-1"
         >
           <span className="inline-block w-2 h-2 rounded-full bg-white animate-pulse mr-1"></span>
           API Test Page
+        </Link>
+        <Link
+          href="/sync-test"
+          className="text-xs font-medium text-white hover:text-gray-200 transition-colors flex items-center gap-1"
+        >
+          <span className="inline-block w-2 h-2 rounded-full bg-white animate-pulse mr-1"></span>
+          Sync Test Page
         </Link>
         <Link
           href="/supabase-test"

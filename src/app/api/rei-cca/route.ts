@@ -5,6 +5,8 @@
  *
  * This route acts as a proxy between the client and the REI API CCA,
  * handling authentication and forwarding requests to avoid CORS issues.
+ * 
+ * Uses the token management service for OAuth token handling with automatic refresh.
  */
 
 import { NextRequest, NextResponse } from "next/server";
@@ -13,9 +15,10 @@ import {
   REMAX_AZURA_CREDENTIALS,
   REMAX_BLUE_OCEAN_CREDENTIALS,
 } from "@/lib/api";
+import { TokenResponse } from "@/lib/api/rei-api-cca";
 
-// Cache for access tokens
-const tokenCache: Record<string, { token: string; expiresAt: number }> = {};
+// Cache for access tokens with refresh mechanism
+const tokenCache: Record<string, { token: string; expiresAt: number; refreshAt: number }> = {};
 
 /**
  * Gets the API credentials for a given integrator ID
@@ -41,10 +44,52 @@ async function ensureValidToken(integratorId: string): Promise<string> {
   const cacheKey = integratorId;
 
   // Check if we have a valid token in cache
-  if (tokenCache[cacheKey] && tokenCache[cacheKey].expiresAt > Date.now()) {
-    console.log(`[Server] Using cached token for ${integratorId}`);
-    return tokenCache[cacheKey].token;
+  const now = Date.now();
+  if (tokenCache[cacheKey]) {
+    // If token is still valid and not due for refresh
+    if (tokenCache[cacheKey].expiresAt > now) {
+      // Check if we should proactively refresh the token
+      if (tokenCache[cacheKey].refreshAt <= now) {
+        console.log(`[Server] Token for ${integratorId} due for refresh, refreshing in background`);
+        // Refresh token in background but still return the current valid token
+        refreshTokenInBackground(integratorId);
+      } else {
+        console.log(`[Server] Using cached token for ${integratorId}`);
+      }
+      return tokenCache[cacheKey].token;
+    }
+    console.log(`[Server] Token for ${integratorId} has expired, getting new token`);
+  } else {
+    console.log(`[Server] No token found for ${integratorId}, getting new token`);
   }
+
+  // Get a new token
+  return await getNewToken(integratorId);
+}
+
+/**
+ * Refreshes a token in the background without blocking the current request
+ * @param integratorId - The integrator ID to refresh the token for
+ */
+async function refreshTokenInBackground(integratorId: string): Promise<void> {
+  try {
+    console.log(`[Server] Starting background token refresh for ${integratorId}`);
+    await getNewToken(integratorId);
+    console.log(`[Server] Background token refresh completed for ${integratorId}`);
+  } catch (error) {
+    console.error(`[Server] Background token refresh failed for ${integratorId}:`, error);
+    // We don't throw here since this is a background operation
+  }
+}
+
+/**
+ * Gets a new token from the API and caches it
+ * @param integratorId - The integrator ID to get a token for
+ * @returns The new token
+ */
+async function getNewToken(integratorId: string): Promise<string> {
+  const credentials = getCredentialsForIntegrator(integratorId);
+  const cacheKey = integratorId;
 
   try {
     console.log(`[Server] Getting new token for ${integratorId}`, {
@@ -56,7 +101,6 @@ async function ensureValidToken(integratorId: string): Promise<string> {
     // Get a new token from the API
     const tokenUrl = `${credentials.apiUrl}/oauth/token`;
 
-    // Use the same authentication approach that works in the auth route
     // Standard OAuth 2.0 password grant type with form-urlencoded format
     const params = new URLSearchParams();
     params.append("grant_type", "password"); // Use password grant type as specified in docs
@@ -74,15 +118,33 @@ async function ensureValidToken(integratorId: string): Promise<string> {
       },
     });
 
-    // Cache the token with expiry time (24 hours - 5 minutes buffer)
-    const expiresIn = 24 * 60 * 60 * 1000 - 5 * 60 * 1000;
+    // Get token response data
+    const tokenResponse = response.data as TokenResponse;
+    
+    // Convert expires_in from seconds to milliseconds
+    const expiryMs = tokenResponse.expires_in * 1000;
+    
+    // Calculate absolute expiry time
+    const expiresAt = Date.now() + expiryMs;
+    
+    // Calculate refresh time (30 minutes before expiry)
+    const refreshBuffer = 30 * 60 * 1000; // 30 minutes
+    const refreshAt = expiresAt - refreshBuffer;
+
+    // Cache the token with expiry and refresh times
     tokenCache[cacheKey] = {
-      token: response.data.access_token,
-      expiresAt: Date.now() + expiresIn,
+      token: tokenResponse.access_token,
+      expiresAt: expiresAt,
+      refreshAt: refreshAt
     };
 
-    console.log(`[Server] Successfully obtained new token for ${integratorId}`);
-    return response.data.access_token;
+    console.log(`[Server] Successfully obtained new token for ${integratorId}`, {
+      expiresAt: new Date(expiresAt).toISOString(),
+      refreshAt: new Date(refreshAt).toISOString(),
+      expiresIn: `${tokenResponse.expires_in} seconds`
+    });
+    
+    return tokenResponse.access_token;
   } catch (error) {
     console.error(`[Server] Error getting token for ${integratorId}:`, error);
 

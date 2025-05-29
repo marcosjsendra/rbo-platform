@@ -6,14 +6,14 @@
  */
 
 import { NextResponse } from 'next/server'
-import { supabaseServer } from '@/lib/supabase'
+import { createRouteHandlerClient } from '@/lib/supabase/server'
 
 export async function GET() {
   try {
     console.log('src/app/api/supabase-test/route.ts: Handling GET request to test Supabase connection')
     
-    // Create a Supabase server client
-    const supabase = supabaseServer.createClient()
+    // Create a Supabase route handler client
+    const supabase = createRouteHandlerClient()
     
     // Query the zones table
     const { data, error } = await supabase

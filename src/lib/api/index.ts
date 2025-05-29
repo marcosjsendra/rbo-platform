@@ -25,6 +25,16 @@ export {
   getApiClient,
 } from "./api-client";
 
+// Export token management functions
+export {
+  getValidToken,
+  forceRefreshToken,
+  tokenNeedsRefresh,
+  getTokenExpiryInfo,
+  clearTokenCache,
+  clearToken,
+} from "./token-manager";
+
 // Export constants for RE/MAX AZURA and BLUE OCEAN credentials
 export const REMAX_AZURA_CREDENTIALS = {
   apiUrl: 'https://remax-cca.com/api/v1',  // Exact URL from documentation

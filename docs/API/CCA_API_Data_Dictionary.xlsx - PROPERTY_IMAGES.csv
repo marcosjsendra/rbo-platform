@@ -1,0 +1,9 @@
+Caribbean and Central America,,,
+,,,
+PROPERTY IMAGES FIELDS DEFINITION (v1.0),,,
+,,,
+No.,NAME FIELD,DATA TYPE,DESCRIPTION
+1,ListingId,integer,Field  to identify a listing in the system
+2,Prioridad,integer,Field  to identify the order of the images.
+3,ImageUrl,varchar(200),Field to identify the URL fo the image.
+4,Status,integer,Field to identify the status of the image

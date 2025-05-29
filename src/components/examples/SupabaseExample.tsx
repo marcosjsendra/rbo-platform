@@ -8,7 +8,7 @@
  */
 
 import { useState, useEffect } from 'react'
-import { supabaseClient } from '@/lib/supabase'
+import { createClientComponentClient } from '@/lib/supabase/client'
 
 // Define the Zone type based on our database schema
 type Zone = {
@@ -29,7 +29,7 @@ export default function SupabaseExample() {
 
   useEffect(() => {
     // Create a Supabase client
-    const supabase = supabaseClient.createClient()
+    const supabase = createClientComponentClient()
     
     async function fetchZones() {
       try {
