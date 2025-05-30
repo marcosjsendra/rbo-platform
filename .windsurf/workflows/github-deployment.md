@@ -1,0 +1,178 @@
+---
+description: Github Deployment
+---
+
+name: GitHub CI/CD Pipeline
+description: Continuous Integration and Deployment workflow for RE/MAX Blue Ocean website
+
+on:
+push:
+branches: [main, develop]
+pull_request:
+branches: [main, develop]
+workflow_dispatch:
+inputs:
+deploy_environment:
+description: 'Environment to deploy to'
+required: true
+default: 'preview'
+type: choice
+options: - preview - production
+
+env:
+NODE_VERSION: '18.x'
+NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL }}
+API_KEY_AZURA: ${{ secrets.API_KEY_AZURA }}
+INTEGRATOR_ID_AZURA: ${{ secrets.INTEGRATOR_ID_AZURA }}
+SECRET_KEY_AZURA: ${{ secrets.SECRET_KEY_AZURA }}
+API_KEY_BLUEOCEAN: ${{ secrets.API_KEY_BLUEOCEAN }}
+INTEGRATOR_ID_BLUEOCEAN: ${{ secrets.INTEGRATOR_ID_BLUEOCEAN }}
+SECRET_KEY_BLUEOCEAN: ${{ secrets.SECRET_KEY_BLUEOCEAN }}
+
+jobs:
+lint-and-test:
+name: Lint and Test
+runs-on: ubuntu-latest
+steps: - name: Checkout Repository
+uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Run ESLint
+        run: npm run lint
+
+      - name: Type Check
+        run: npm run type-check
+
+      - name: Run Tests
+        run: npm test
+
+build:
+name: Build Next.js App
+needs: lint-and-test
+runs-on: ubuntu-latest
+steps: - name: Checkout Repository
+uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Build Application
+        run: npm run build
+
+      - name: Cache Build Output
+        uses: actions/cache@v3
+        with:
+          path: .next
+          key: ${{ runner.os }}-nextjs-${{ github.sha }}
+
+deploy-preview:
+name: Deploy to Preview
+needs: build
+if: github.event_name == 'pull_request' || (github.event_name == 'workflow_dispatch' && github.event.inputs.deploy_environment == 'preview')
+runs-on: ubuntu-latest
+steps: - name: Checkout Repository
+uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Restore Build Cache
+        uses: actions/cache@v3
+        with:
+          path: .next
+          key: ${{ runner.os }}-nextjs-${{ github.sha }}
+
+      - name: Install Vercel CLI
+        run: npm install -g vercel
+
+      - name: Deploy to Vercel (Preview)
+        run: |
+          vercel deploy --token=${{ secrets.VERCEL_TOKEN }} --confirm > deployment-url.txt
+          echo "PREVIEW_URL=$(cat deployment-url.txt)" >> $GITHUB_ENV
+
+      - name: Comment Preview URL
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v6
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `🚀 Preview deployment is ready! [Visit Preview](${process.env.PREVIEW_URL})`
+            })
+
+deploy-production:
+name: Deploy to Production
+needs: build
+if: github.event_name == 'push' && github.ref == 'refs/heads/main' || (github.event_name == 'workflow_dispatch' && github.event.inputs.deploy_environment == 'production')
+runs-on: ubuntu-latest
+steps: - name: Checkout Repository
+uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Restore Build Cache
+        uses: actions/cache@v3
+        with:
+          path: .next
+          key: ${{ runner.os }}-nextjs-${{ github.sha }}
+
+      - name: Install Vercel CLI
+        run: npm install -g vercel
+
+      - name: Deploy to Vercel (Production)
+        run: |
+          vercel deploy --prod --token=${{ secrets.VERCEL_TOKEN }} --confirm > deployment-url.txt
+          echo "PRODUCTION_URL=$(cat deployment-url.txt)" >> $GITHUB_ENV
+
+      - name: Create Deployment Tag
+        run: |
+          DEPLOY_DATE=$(date +'%Y%m%d%H%M%S')
+          git tag "production-${DEPLOY_DATE}"
+          git push origin "production-${DEPLOY_DATE}"
+
+      - name: Create Release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: "production-${DEPLOY_DATE}"
+          release_name: "Production Release ${DEPLOY_DATE}"
+          body: |
+            🚀 Production deployment completed
+
+            Deployment URL: ${{ env.PRODUCTION_URL }}
+
+            Deployed from commit: ${{ github.sha }}
+
+            Deployment date: $(date +'%Y-%m-%d %H:%M:%S')
+          draft: false
+          prerelease: false
