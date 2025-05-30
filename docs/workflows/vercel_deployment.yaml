@@ -1,0 +1,118 @@
+name: Vercel Deployment
+description: Deploy the RE/MAX Blue Ocean website to Vercel
+
+inputs:
+  environment:
+    type: select
+    description: The environment to deploy to
+    options:
+      - preview
+      - production
+    default: preview
+  
+  deploy_method:
+    type: select
+    description: Method to use for deployment
+    options:
+      - cli
+      - github
+    default: cli
+
+steps:
+  - name: Install Vercel CLI
+    run: npm install -g vercel
+    if: ${{ inputs.deploy_method == 'cli' }}
+
+  - name: Login to Vercel
+    run: vercel login
+    if: ${{ inputs.deploy_method == 'cli' }}
+
+  - name: ESLint Check
+    run: npm run lint
+    description: Run ESLint to check for code quality issues
+
+  - name: Type Check
+    run: npm run type-check
+    description: Verify TypeScript types are correct
+
+  - name: Set Environment Variables
+    description: Configure environment variables for REI API CCA credentials
+    run: |
+      vercel env add NEXT_PUBLIC_API_URL
+      vercel env add API_KEY_AZURA
+      vercel env add INTEGRATOR_ID_AZURA
+      vercel env add SECRET_KEY_AZURA
+      vercel env add API_KEY_BLUEOCEAN
+      vercel env add INTEGRATOR_ID_BLUEOCEAN
+      vercel env add SECRET_KEY_BLUEOCEAN
+    if: ${{ inputs.deploy_method == 'cli' }}
+
+  - name: Deploy to Preview
+    run: vercel
+    if: ${{ inputs.environment == 'preview' && inputs.deploy_method == 'cli' }}
+    description: Deploy to preview environment for testing
+
+  - name: Deploy to Production
+    run: vercel --prod
+    if: ${{ inputs.environment == 'production' && inputs.deploy_method == 'cli' }}
+    description: Deploy to production environment
+
+  - name: GitHub Integration Setup
+    description: Set up GitHub integration with Vercel (one-time setup)
+    run: |
+      echo "Follow these steps in the Vercel dashboard:"
+      echo "1. Go to your project settings"
+      echo "2. Connect to your GitHub repository"
+      echo "3. Configure automatic deployments for the main branch"
+      echo "4. Set up preview deployments for pull requests"
+    if: ${{ inputs.deploy_method == 'github' }}
+
+  - name: Create Feature Branch
+    description: Create a new branch for feature development
+    run: |
+      git checkout -b feature/new-feature
+      # Make changes
+      git commit -m "Implement new feature"
+      git push -u origin feature/new-feature
+    if: ${{ inputs.deploy_method == 'github' }}
+
+  - name: Create Pull Request
+    description: Create a pull request for preview deployment
+    run: |
+      echo "Create a pull request on GitHub"
+      echo "Vercel will automatically generate a preview URL"
+    if: ${{ inputs.deploy_method == 'github' && inputs.environment == 'preview' }}
+
+  - name: Merge Pull Request
+    description: Merge the pull request to trigger production deployment
+    run: |
+      echo "Merge the pull request to the main branch"
+      echo "Vercel will automatically deploy to production"
+    if: ${{ inputs.deploy_method == 'github' && inputs.environment == 'production' }}
+
+  - name: Custom Domain Setup
+    description: Set up custom domain for the deployment
+    run: |
+      echo "Follow these steps in the Vercel dashboard:"
+      echo "1. Go to Settings > Domains"
+      echo "2. Add your domain"
+      echo "3. Configure DNS settings as instructed by Vercel"
+    optional: true
+
+  - name: Set Up Analytics
+    description: Configure Vercel Analytics for performance monitoring
+    run: |
+      echo "Follow these steps in the Vercel dashboard:"
+      echo "1. Go to Analytics"
+      echo "2. Enable Web Vitals and Real User Monitoring"
+      echo "3. Configure alerting for critical issues"
+    optional: true
+
+  - name: Implement Caching
+    description: Set up caching for API responses
+    run: |
+      echo "Implement caching strategies in the codebase:"
+      echo "1. Configure Incremental Static Regeneration (ISR)"
+      echo "2. Set up caching for API responses"
+      echo "3. Optimize image loading and processing"
+    optional: true

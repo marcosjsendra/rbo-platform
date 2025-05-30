@@ -1,0 +1,151 @@
+name: Scheduled Data Synchronization
+
+# Run this workflow on a schedule and allow manual triggers
+on:
+  schedule:
+    # Run twice daily at 2:00 AM and 2:00 PM UTC
+    # Adjust these times as needed for your specific requirements
+    - cron: '0 2,14 * * *'
+  
+  # Allow manual triggering of the workflow
+  workflow_dispatch:
+    inputs:
+      brand:
+        description: 'Brand to synchronize (AZURA or BLUE_OCEAN)'
+        required: true
+        default: 'BLUE_OCEAN'
+        type: choice
+        options:
+          - AZURA
+          - BLUE_OCEAN
+      entity_type:
+        description: 'Entity type to synchronize'
+        required: false
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - properties
+          - agents
+      force_sync:
+        description: 'Force full synchronization'
+        required: false
+        default: false
+        type: boolean
+
+# Set permissions for the GitHub token
+permissions:
+  contents: read
+
+jobs:
+  sync-data:
+    name: Synchronize Data
+    runs-on: ubuntu-latest
+    
+    # Prevent multiple workflow runs from interfering with each other
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
+      cancel-in-progress: false
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Synchronize BLUE_OCEAN data (scheduled)
+        if: github.event_name == 'schedule'
+        env:
+          # Use GitHub secrets for sensitive information
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          BLUE_OCEAN_API_URL: ${{ secrets.BLUE_OCEAN_API_URL }}
+          BLUE_OCEAN_API_KEY: ${{ secrets.BLUE_OCEAN_API_KEY }}
+          BLUE_OCEAN_INTEGRATOR_ID: ${{ secrets.BLUE_OCEAN_INTEGRATOR_ID }}
+          BLUE_OCEAN_SECRET_KEY: ${{ secrets.BLUE_OCEAN_SECRET_KEY }}
+          AZURA_API_URL: ${{ secrets.AZURA_API_URL }}
+          AZURA_API_KEY: ${{ secrets.AZURA_API_KEY }}
+          AZURA_INTEGRATOR_ID: ${{ secrets.AZURA_INTEGRATOR_ID }}
+          AZURA_SECRET_KEY: ${{ secrets.AZURA_SECRET_KEY }}
+        run: |
+          echo "Running scheduled synchronization for BLUE_OCEAN..."
+          npx tsx scripts/sync-data.ts --brand=BLUE_OCEAN
+      
+      - name: Synchronize AZURA data (scheduled)
+        if: github.event_name == 'schedule'
+        env:
+          # Use GitHub secrets for sensitive information
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          BLUE_OCEAN_API_URL: ${{ secrets.BLUE_OCEAN_API_URL }}
+          BLUE_OCEAN_API_KEY: ${{ secrets.BLUE_OCEAN_API_KEY }}
+          BLUE_OCEAN_INTEGRATOR_ID: ${{ secrets.BLUE_OCEAN_INTEGRATOR_ID }}
+          BLUE_OCEAN_SECRET_KEY: ${{ secrets.BLUE_OCEAN_SECRET_KEY }}
+          AZURA_API_URL: ${{ secrets.AZURA_API_URL }}
+          AZURA_API_KEY: ${{ secrets.AZURA_API_KEY }}
+          AZURA_INTEGRATOR_ID: ${{ secrets.AZURA_INTEGRATOR_ID }}
+          AZURA_SECRET_KEY: ${{ secrets.AZURA_SECRET_KEY }}
+        run: |
+          echo "Running scheduled synchronization for AZURA..."
+          npx tsx scripts/sync-data.ts --brand=AZURA
+      
+      - name: Synchronize data (manual)
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          # Use GitHub secrets for sensitive information
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          BLUE_OCEAN_API_URL: ${{ secrets.BLUE_OCEAN_API_URL }}
+          BLUE_OCEAN_API_KEY: ${{ secrets.BLUE_OCEAN_API_KEY }}
+          BLUE_OCEAN_INTEGRATOR_ID: ${{ secrets.BLUE_OCEAN_INTEGRATOR_ID }}
+          BLUE_OCEAN_SECRET_KEY: ${{ secrets.BLUE_OCEAN_SECRET_KEY }}
+          AZURA_API_URL: ${{ secrets.AZURA_API_URL }}
+          AZURA_API_KEY: ${{ secrets.AZURA_API_KEY }}
+          AZURA_INTEGRATOR_ID: ${{ secrets.AZURA_INTEGRATOR_ID }}
+          AZURA_SECRET_KEY: ${{ secrets.AZURA_SECRET_KEY }}
+        run: |
+          BRAND=${{ github.event.inputs.brand }}
+          ENTITY_TYPE=${{ github.event.inputs.entity_type }}
+          FORCE_SYNC=${{ github.event.inputs.force_sync }}
+          
+          echo "Running manual synchronization for $BRAND..."
+          
+          # Build command with optional parameters
+          CMD="npx tsx scripts/sync-data.ts --brand=$BRAND"
+          
+          if [ "$ENTITY_TYPE" != "all" ]; then
+            CMD="$CMD --entity=$ENTITY_TYPE"
+          fi
+          
+          if [ "$FORCE_SYNC" == "true" ]; then
+            CMD="$CMD --force"
+          fi
+          
+          # Run the command
+          echo "Executing: $CMD"
+          $CMD
+      
+      - name: Notify on failure
+        if: failure()
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const { repo, owner } = context.repo;
+            const run_link = `https://github.com/${owner}/${repo}/actions/runs/${context.runId}`;
+            
+            github.rest.issues.create({
+              owner,
+              repo,
+              title: `❌ Data synchronization failed on ${new Date().toISOString()}`,
+              body: `The scheduled data synchronization workflow failed. [View the logs](${run_link}) for more details.`
+            });
