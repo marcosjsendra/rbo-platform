@@ -2,47 +2,67 @@
 trigger: always_on
 ---
 
-## REI API CCA Integration Rules
+# REI API CCA Configuration and URL Rules
 
-### API URL Structure
+### Token Endpoint Configuration
+- **URL**: `https://remax-cca.com/api/v1/oauth/token`
+- **Grant Type**: password
+- **Parameters**:
+  - `integratorID` (capital ID)
+  - `apikey`
+  - `secretkey`
+- **Content-Type**: application/x-www-form-urlencoded
+- **Token Expiry**: 24 hours (86399 seconds)
 
-- **Always use the correct base URL**: `https://remax-cca.com/api/v1/`
-- **Never use `/reiapi/` path** despite what older documentation states
-- **Use exact endpoint names**:
-  - Properties List: `GetProperties/take/{take}/skip/{skip}`
-  - Property Details: `GetPropertyDetails/{listingid}`
-  - Associates List: `associates/take/{take}/skip/{skip}`
-  - Associate Details: `associates/{associateid}`
+### API Endpoints Configuration
+- **Base URL**: `https://remax-cca.com/api/v1/`
+- **Example Endpoints**:
+  - Properties: `https://remax-cca.com/api/v1/GetProperties/take/{take}/skip/{skip}`
+  - Property Details: `https://remax-cca.com/api/v1/GetPropertyDetails/{listingid}`
+  - Associates: `https://remax-cca.com/api/v1/associates/take/{take}/skip/{skip}`
+  - Associate Details: `https://remax-cca.com/api/v1/associates/{associateid}`
 
-### Authentication & Token Management
+## Critical Rules
 
-- **Token endpoint**: Always use `https://remax-cca.com/api/v1/oauth/token`
-- **Parameter casing**: Maintain exact casing (e.g., `integratorID`)
-- **Token refresh**: Implement 30-minute refresh buffer before expiration
-- **Error handling**: Always implement proper token expiration and network error handling
+### Authentication Rules
+1. Use `/api/v1/oauth/token` for authentication
+2. Always use password grant type
+3. Maintain exact parameter casing
+4. Include all three credentials in form data
+5. Keep minimal standard headers
 
-### Data Verification
+### API Endpoint Rules
+1. Always use `/api/v1` base path (NOT `/reiapi`)
+2. Use exact endpoint names:
+   - `GetProperties` (not just "properties")
+   - `GetPropertyDetails` (not just "property")
+3. Follow the exact path format:
+   - For lists: `/take/{take}/skip/{skip}`
+   - For details: `/{id}`
 
-- **Always verify data integrity** between REI API CCA and Supabase
-- **Log all API interactions** for debugging and monitoring
-- **Document any discrepancies** in `/docs/Errors/reported/`
-- **Create fix reports** in `/docs/Errors/fixedReport/`
+## Important Notes
+1. There is a discrepancy in the API documentation:
+   - Documentation states base URL should be `/reiapi/`
+   - BUT all actual examples use `/api/v1/`
+   - We must follow the actual examples, using `/api/v1/`
 
-### Implementation Guidelines
+2. URL Structure Examples:
+   ```
+   # Properties List
+   GET https://remax-cca.com/api/v1/GetProperties/take/10/skip/0
 
-1. **Before making API calls**:
+   # Property Details
+   GET https://remax-cca.com/api/v1/GetPropertyDetails/10744
 
-   - Verify endpoint URL structure
-   - Check token validity
-   - Prepare error handling
+   # Associates List
+   GET https://remax-cca.com/api/v1/associates/take/10/skip/0
 
-2. **During development**:
+   # Associate Details
+   GET https://remax-cca.com/api/v1/associates/128
+   ```
 
-   - Use real data, never mock data
-   - Log all API responses
-   - Document any deviations from specifications
-
-3. **After implementation**:
-   - Update relevant documentation
-   - Create progress reports
-   - Update URL rules if new endpoints are discovered
+## Documentation References
+- Implementation details: `/remax-blueocean/docs/Errors/fixedReport/phase2/REI_API_CCA_Authentication_Stabilization.md`
+- Full API documentation: `/remax-blueocean/docs/API/API_CCA_Specifications.markdown`
+- Data Dictionary Properties: `/remax-blueocean/docs/API/CCA_API_Data_Dictionary_PROPERTY.csv`
+- Data Dictionary Property Images: `/remax-blueocean/docs/API/CCA_API_Data_Dictionary_PROPERTY_IMAGES.csv`
